@@ -25,3 +25,9 @@ test('TextNode: chars', function() {
   const ast = parse(template);
   equal(print(ast), template);
 });
+
+test('MustacheStatement: path', function() {
+  const template = '<h1>{{model.title}}</h1>';
+  const ast = parse(template);
+  equal(print(ast), template);
+});
