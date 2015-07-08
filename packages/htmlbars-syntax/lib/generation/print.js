@@ -3,41 +3,45 @@ import { traverse } from "htmlbars-syntax";
 export default function(ast) {
   const output = [];
 
+  function print() {
+    output.push(...arguments);
+  }
+
   traverse(ast, {
     ElementNode: {
       enter(node) {
-        output.push(`<${node.tag}`);
+        print(`<${node.tag}`);
         if(node.attributes.length) {
-          output.push(" ");
+          print(" ");
         } else {
-          output.push(">");
+          print(">");
         }
       },
       exit(node) {
-        output.push(`</${node.tag}>`);
+        print(`</${node.tag}>`);
       }
     },
     TextNode(node) {
-      output.push(node.chars);
+      print(node.chars);
     },
     AttrNode: {
       enter(node) {
-        output.push(node.name, "=", '"');
+        print(node.name, "=", '"');
       },
       exit() {
-        output.push('">');
+        print('">');
       }
     },
     MustacheStatement: {
       enter() {
-        output.push('{{');
+        print('{{');
       },
       exit() {
-        output.push('}}');
+        print('}}');
       }
     },
     PathExpression(node) {
-      output.push(node.parts.join('.'));
+      print(node.parts.join('.'));
     }
   });
 
