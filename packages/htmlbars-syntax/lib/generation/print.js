@@ -5,11 +5,28 @@ export default function(ast) {
 
   traverse(ast, {
     ElementNode: {
-      enter(node) { output.push(`<${node.tag}>`); },
-      exit(node) { output.push(`</${node.tag}>`); }
+      enter(node) {
+        output.push(`<${node.tag}`);
+        if(node.attributes.length) {
+          output.push(" ");
+        } else {
+          output.push(">");
+        }
+      },
+      exit(node) {
+        output.push(`</${node.tag}>`);
+      }
     },
     TextNode(node) {
       output.push(node.chars);
+    },
+    AttrNode: {
+      enter(node) {
+        output.push(node.name, "=", '"');
+      },
+      exit() {
+        output.push('">');
+      }
     }
   });
 
