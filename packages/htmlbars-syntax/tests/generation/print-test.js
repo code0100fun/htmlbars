@@ -7,3 +7,15 @@ test('ElementNode: tag', function() {
   const ast = parse(template);
   equal(print(ast), template);
 });
+
+test('ElementNode: nested tags with indent', function() {
+  const template = '<div>\n  <p>Test</p>\n</div>';
+  const ast = parse(template);
+  equal(print(ast), template);
+});
+
+test('TextNode: chars', function() {
+  const template = '<h1>Test</h1>';
+  const ast = parse(template);
+  equal(print(ast), template);
+});
