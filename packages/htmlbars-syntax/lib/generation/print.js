@@ -61,6 +61,15 @@ export default function(ast) {
     },
     StringLiteral(node) {
       print(`"${node.original}"`);
+    },
+    HashPair: {
+      enter(node) {
+        pushJoin();
+        print(node.key, "=");
+      },
+      exit() {
+        print(popJoin(''));
+      }
     }
   });
 

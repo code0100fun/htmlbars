@@ -30,3 +30,7 @@ test('MustacheStatement: path', function() {
 test('MustacheStatement: StringLiteral param', function() {
   printEqual('<h1>{{link-to "Foo"}}</h1>');
 });
+
+test('MustacheStatement: hash', function() {
+  printEqual('<h1>{{link-to "Foo" class="bar"}}</h1>');
+});
