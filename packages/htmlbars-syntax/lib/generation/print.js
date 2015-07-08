@@ -27,6 +27,17 @@ export default function(ast) {
       exit() {
         output.push('">');
       }
+    },
+    MustacheStatement: {
+      enter() {
+        output.push('{{');
+      },
+      exit() {
+        output.push('}}');
+      }
+    },
+    PathExpression(node) {
+      output.push(node.parts.join('.'));
     }
   });
 
