@@ -40,10 +40,16 @@ export default function(ast) {
     },
     AttrNode: {
       enter(node) {
-        print(node.name, "=", '"');
+        print(node.name, "=");
+        if(node.value.type === "TextNode") {
+          print('"');
+        }
       },
-      exit() {
-        print('">');
+      exit(node) {
+        if(node.value.type === "TextNode") {
+          print('"');
+        }
+        print('>');
       }
     },
     MustacheStatement: {
