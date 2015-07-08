@@ -1,11 +1,25 @@
 import { traverse } from "htmlbars-syntax";
 
 export default function(ast) {
-  const output = [];
+  const outputStack = [];
+
+  function currentOutput() {
+    return outputStack[outputStack.length - 1];
+  }
 
   function print() {
-    output.push(...arguments);
+    currentOutput().push(...arguments);
   }
+
+  function pushJoin() {
+    outputStack.push([]);
+  }
+
+  function popJoin() {
+    return outputStack.pop().join(...arguments);
+  }
+
+  pushJoin();
 
   traverse(ast, {
     ElementNode: {
@@ -35,15 +49,20 @@ export default function(ast) {
     MustacheStatement: {
       enter() {
         print('{{');
+        pushJoin();
       },
       exit() {
+        print(popJoin(' '));
         print('}}');
       }
     },
     PathExpression(node) {
       print(node.parts.join('.'));
+    },
+    StringLiteral(node) {
+      print(`"${node.original}"`);
     }
   });
 
-  return output.join('');
+  return popJoin('');
 }

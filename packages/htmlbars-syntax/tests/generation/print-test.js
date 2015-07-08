@@ -26,3 +26,7 @@ test('TextNode: chars', function() {
 test('MustacheStatement: path', function() {
   printEqual('<h1>{{model.title}}</h1>');
 });
+
+test('MustacheStatement: StringLiteral param', function() {
+  printEqual('<h1>{{link-to "Foo"}}</h1>');
+});
