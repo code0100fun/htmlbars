@@ -1,33 +1,28 @@
 import { parse, print } from '../../htmlbars-syntax';
 
+function printEqual(template) {
+  const ast = parse(template);
+  equal(print(ast), template);
+}
+
 QUnit.module('[htmlbars-syntax] Generation - printing');
 
 test('ElementNode: tag', function() {
-  const template = '<h1></h1>';
-  const ast = parse(template);
-  equal(print(ast), template);
+  printEqual('<h1></h1>');
 });
 
 test('ElementNode: nested tags with indent', function() {
-  const template = '<div>\n  <p>Test</p>\n</div>';
-  const ast = parse(template);
-  equal(print(ast), template);
+  printEqual('<div>\n  <p>Test</p>\n</div>');
 });
 
 test('ElementNode: attributes', function() {
-  const template = '<h1 class="foo"></h1>';
-  const ast = parse(template);
-  equal(print(ast), template);
+  printEqual('<h1 class="foo"></h1>');
 });
 
 test('TextNode: chars', function() {
-  const template = '<h1>Test</h1>';
-  const ast = parse(template);
-  equal(print(ast), template);
+  printEqual('<h1>Test</h1>');
 });
 
 test('MustacheStatement: path', function() {
-  const template = '<h1>{{model.title}}</h1>';
-  const ast = parse(template);
-  equal(print(ast), template);
+  printEqual('<h1>{{model.title}}</h1>');
 });
