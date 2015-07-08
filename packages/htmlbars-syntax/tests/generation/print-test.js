@@ -14,6 +14,12 @@ test('ElementNode: nested tags with indent', function() {
   equal(print(ast), template);
 });
 
+test('ElementNode: attributes', function() {
+  const template = '<h1 class="foo"></h1>';
+  const ast = parse(template);
+  equal(print(ast), template);
+});
+
 test('TextNode: chars', function() {
   const template = '<h1>Test</h1>';
   const ast = parse(template);
