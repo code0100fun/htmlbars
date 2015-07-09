@@ -2,6 +2,7 @@ import { traverse } from "htmlbars-syntax";
 
 export default function(ast) {
   const outputStack = [];
+  let currentElement;
 
   function currentOutput() {
     return outputStack[outputStack.length - 1];
@@ -11,27 +12,44 @@ export default function(ast) {
     currentOutput().push(...arguments);
   }
 
-  function pushJoin() {
+  function printEach(stack) {
+    print.apply(this, stack);
+  }
+
+  function pushStack() {
     outputStack.push([]);
   }
 
-  function popJoin() {
-    return outputStack.pop().join(...arguments);
+  function popStack() {
+    return outputStack.pop();
   }
 
-  pushJoin();
+  function popJoin() {
+    return popStack().join(...arguments);
+  }
+
+  function lastAttribute(node) {
+    let attrs = currentElement.attributes;
+    return attrs[attrs.length-1] === node;
+  }
+
+  pushStack();
 
   traverse(ast, {
     ElementNode: {
       enter(node) {
+        currentElement = node;
         print(`<${node.tag}`);
         if(node.attributes.length) {
           print(" ");
-        } else {
-          print(">");
         }
+        pushStack();
       },
       exit(node) {
+        currentElement = null;
+        const children = popStack();
+        print(">");
+        printEach(children);
         print(`</${node.tag}>`);
       }
     },
@@ -40,6 +58,7 @@ export default function(ast) {
     },
     AttrNode: {
       enter(node) {
+        pushStack();
         print(node.name, "=");
         if(node.value.type === "TextNode") {
           print('"');
@@ -49,13 +68,18 @@ export default function(ast) {
         if(node.value.type === "TextNode") {
           print('"');
         }
-        print('>');
+        print(popJoin(''));
+        if(lastAttribute(node)) {
+          const attributes = popJoin(' ');
+          print(attributes);
+          pushStack();
+        }
       }
     },
     MustacheStatement: {
       enter() {
         print('{{');
-        pushJoin();
+        pushStack();
       },
       exit() {
         print(popJoin(' '));
@@ -70,7 +94,7 @@ export default function(ast) {
     },
     HashPair: {
       enter(node) {
-        pushJoin();
+        pushStack();
         print(node.key, "=");
       },
       exit() {
