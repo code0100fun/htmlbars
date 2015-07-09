@@ -16,7 +16,7 @@ test('ElementNode: nested tags with indent', function() {
 });
 
 test('ElementNode: attributes', function() {
-  printEqual('<h1 class="foo"></h1>');
+  printEqual('<h1 class="foo" id="title"></h1>');
 });
 
 test('TextNode: chars', function() {
@@ -33,6 +33,10 @@ test('MustacheStatement: StringLiteral param', function() {
 
 test('MustacheStatement: hash', function() {
   printEqual('<h1>{{link-to "Foo" class="bar"}}</h1>');
+});
+
+test('MustacheStatement: as element attribute', function() {
+  printEqual('<h1 class={{if foo "foo" "bar"}}>Test</h1>');
 });
 
 test('MustacheStatement: as element attribute', function() {
