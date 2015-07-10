@@ -2,8 +2,6 @@ import { traverse } from "htmlbars-syntax";
 
 export default function(ast) {
   const outputStack = [];
-  let currentElement;
-  let currentAttr;
 
   function currentOutput() {
     return outputStack[outputStack.length - 1];
@@ -29,22 +27,6 @@ export default function(ast) {
     return popStack().join(...arguments);
   }
 
-  function lastAttribute(node) {
-    let attrs = currentElement.attributes;
-    return attrs[attrs.length-1] === node;
-  }
-
-  function lastModifier(node) {
-    let mods = currentElement.modifiers;
-    return mods[mods.length-1] === node;
-  }
-
-  function stringInConcat(node) {
-    return currentAttr &&
-           currentAttr.value.type === 'ConcatStatement' &&
-           currentAttr.value.parts.indexOf(node) !== -1;
-  }
-
   function wrapInQuotes(node) {
     return node.value.type === "TextNode" ||
            node.value.type === "ConcatStatement";
@@ -55,16 +37,40 @@ export default function(ast) {
   traverse(ast, {
     ElementNode: {
       enter(node) {
-        currentElement = node;
         print(`<${node.tag}`);
-        pushStack();
       },
       exit(node) {
-        currentElement = null;
         const children = popStack();
         print(">");
         printEach(children);
         print(`</${node.tag}>`);
+      },
+      keys: {
+        modifiers: {
+          enter() {
+            pushStack();
+          },
+          exit() {
+            printEach(popStack());
+          }
+        },
+        attributes: {
+          enter() {
+            pushStack();
+          },
+          exit(node) {
+            const attributes = popJoin(' ');
+            if(node.attributes.length) {
+              print(' ');
+            }
+            print(attributes);
+          }
+        },
+        children: {
+          enter() {
+            pushStack();
+          }
+        }
       }
     },
     TextNode(node) {
@@ -72,7 +78,6 @@ export default function(ast) {
     },
     AttrNode: {
       enter(node) {
-        currentAttr = node;
         pushStack();
         print(node.name, "=");
         if(wrapInQuotes(node)) {
@@ -80,16 +85,10 @@ export default function(ast) {
         }
       },
       exit(node) {
-        currentAttr = null;
         if(wrapInQuotes(node)) {
           print('"');
         }
         print(popJoin(''));
-        if(lastAttribute(node)) {
-          const attributes = popJoin(' ');
-          print(' ', attributes);
-          pushStack();
-        }
       }
     },
     MustacheStatement: {
@@ -98,19 +97,48 @@ export default function(ast) {
         pushStack();
       },
       exit() {
-        print(popJoin(' '));
+        print(popJoin(''));
         print('}}');
+      },
+      keys: {
+        params: {
+          enter() {
+            pushStack();
+          },
+          exit(node) {
+            let params = popStack();
+            params = params.map( (param,i) => {
+              if(node.params[i].type === "StringLiteral") {
+                return `"${param}"`;
+              } else {
+                return param;
+              }
+            });
+            if(node.params.length) {
+              print(' ');
+            }
+            print(params.join(' '));
+          }
+        }
       }
     },
     PathExpression(node) {
       print(node.parts.join('.'));
     },
     StringLiteral(node) {
-      if(stringInConcat(node)) {
-        print(`${node.original}`);
-      } else {
-        print(`"${node.original}"`);
-      }
+      print(`${node.original}`);
+    },
+    Hash: {
+      enter() {
+        pushStack();
+      },
+      exit(node) {
+        const hash = popStack().join(' ');
+        if(node.pairs.length) {
+          print(' ');
+        }
+        print(hash);
+      },
     },
     HashPair: {
       enter(node) {
@@ -118,7 +146,17 @@ export default function(ast) {
         print(node.key, "=");
       },
       exit() {
-        print(popJoin(''));
+        print(popStack().join(''));
+      },
+      keys: {
+        value: {
+          enter() {
+            print('"');
+          },
+          exit() {
+            print('"');
+          }
+        }
       }
     },
     ConcatStatement: {
@@ -132,18 +170,32 @@ export default function(ast) {
     ElementModifierStatement: {
       enter() {
         print(' {{');
-        pushStack();
       },
-      exit(node) {
-        print(popJoin(' '));
+      exit() {
         print('}}');
-        if(lastModifier(node)) {
-          const modifiers = popJoin('');
-          print(modifiers);
-          pushStack();
+      },
+      keys: {
+        params: {
+          enter() {
+            pushStack();
+          },
+          exit(node) {
+            let params = popStack();
+            params = params.map( (param,i) => {
+              if(node.params[i].type === "StringLiteral") {
+                return `"${param}"`;
+              } else {
+                return param;
+              }
+            });
+            if(node.params.length) {
+              print(' ');
+            }
+            print(params.join(' '));
+          }
         }
       }
-    },
+    }
   });
 
   return popJoin('');
