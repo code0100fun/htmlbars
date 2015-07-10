@@ -3,6 +3,7 @@ import { traverse } from "htmlbars-syntax";
 export default function(ast) {
   const outputStack = [];
   let currentElement;
+  let currentAttr;
 
   function currentOutput() {
     return outputStack[outputStack.length - 1];
@@ -33,6 +34,17 @@ export default function(ast) {
     return attrs[attrs.length-1] === node;
   }
 
+  function stringInConcat(node) {
+    return currentAttr &&
+           currentAttr.value.type === 'ConcatStatement' &&
+           currentAttr.value.parts.indexOf(node) !== -1;
+  }
+
+  function wrapInQuotes(node) {
+    return node.value.type === "TextNode" ||
+           node.value.type === "ConcatStatement";
+  }
+
   pushStack();
 
   traverse(ast, {
@@ -58,14 +70,16 @@ export default function(ast) {
     },
     AttrNode: {
       enter(node) {
+        currentAttr = node;
         pushStack();
         print(node.name, "=");
-        if(node.value.type === "TextNode") {
+        if(wrapInQuotes(node)) {
           print('"');
         }
       },
       exit(node) {
-        if(node.value.type === "TextNode") {
+        currentAttr = null;
+        if(wrapInQuotes(node)) {
           print('"');
         }
         print(popJoin(''));
@@ -90,7 +104,11 @@ export default function(ast) {
       print(node.parts.join('.'));
     },
     StringLiteral(node) {
-      print(`"${node.original}"`);
+      if(stringInConcat(node)) {
+        print(`${node.original}`);
+      } else {
+        print(`"${node.original}"`);
+      }
     },
     HashPair: {
       enter(node) {
@@ -99,6 +117,14 @@ export default function(ast) {
       },
       exit() {
         print(popJoin(''));
+      }
+    },
+    ConcatStatement: {
+      enter() {
+        pushStack();
+      },
+      exit() {
+        printEach(popStack());
       }
     }
   });
