@@ -46,3 +46,7 @@ test('MustacheStatement: as element attribute', function() {
 test('MustacheStatement: in element attribute string', function() {
   printEqual('<h1 class="{{if active "active" "inactive"}} foo">Test</h1>');
 });
+
+test('ElementModifierStatement', function() {
+  printEqual('<p {{action "activate"}} {{someting foo="bar"}}>Test</p>');
+});

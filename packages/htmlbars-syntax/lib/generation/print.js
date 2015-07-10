@@ -34,6 +34,11 @@ export default function(ast) {
     return attrs[attrs.length-1] === node;
   }
 
+  function lastModifier(node) {
+    let mods = currentElement.modifiers;
+    return mods[mods.length-1] === node;
+  }
+
   function stringInConcat(node) {
     return currentAttr &&
            currentAttr.value.type === 'ConcatStatement' &&
@@ -52,9 +57,6 @@ export default function(ast) {
       enter(node) {
         currentElement = node;
         print(`<${node.tag}`);
-        if(node.attributes.length) {
-          print(" ");
-        }
         pushStack();
       },
       exit(node) {
@@ -85,7 +87,7 @@ export default function(ast) {
         print(popJoin(''));
         if(lastAttribute(node)) {
           const attributes = popJoin(' ');
-          print(attributes);
+          print(' ', attributes);
           pushStack();
         }
       }
@@ -126,7 +128,22 @@ export default function(ast) {
       exit() {
         printEach(popStack());
       }
-    }
+    },
+    ElementModifierStatement: {
+      enter() {
+        print(' {{');
+        pushStack();
+      },
+      exit(node) {
+        print(popJoin(' '));
+        print('}}');
+        if(lastModifier(node)) {
+          const modifiers = popJoin('');
+          print(modifiers);
+          pushStack();
+        }
+      }
+    },
   });
 
   return popJoin('');
