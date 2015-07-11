@@ -32,6 +32,26 @@ export default function(ast) {
            node.value.type === "ConcatStatement";
   }
 
+  const mustacheParams = {
+    enter() {
+      pushStack();
+    },
+    exit(node) {
+      let params = popStack();
+      params = params.map( (param,i) => {
+        if(node.params[i].type === "StringLiteral") {
+          return `"${param}"`;
+        } else {
+          return param;
+        }
+      });
+      if(node.params.length) {
+        print(' ');
+      }
+      print(params.join(' '));
+    }
+  };
+
   pushStack();
 
   traverse(ast, {
@@ -101,25 +121,7 @@ export default function(ast) {
         print('}}');
       },
       keys: {
-        params: {
-          enter() {
-            pushStack();
-          },
-          exit(node) {
-            let params = popStack();
-            params = params.map( (param,i) => {
-              if(node.params[i].type === "StringLiteral") {
-                return `"${param}"`;
-              } else {
-                return param;
-              }
-            });
-            if(node.params.length) {
-              print(' ');
-            }
-            print(params.join(' '));
-          }
-        }
+        params: mustacheParams
       }
     },
     PathExpression(node) {
@@ -175,25 +177,18 @@ export default function(ast) {
         print('}}');
       },
       keys: {
-        params: {
-          enter() {
-            pushStack();
-          },
-          exit(node) {
-            let params = popStack();
-            params = params.map( (param,i) => {
-              if(node.params[i].type === "StringLiteral") {
-                return `"${param}"`;
-              } else {
-                return param;
-              }
-            });
-            if(node.params.length) {
-              print(' ');
-            }
-            print(params.join(' '));
-          }
-        }
+        params: mustacheParams
+      }
+    },
+    PartialStatement: {
+      enter() {
+        print('{{>');
+      },
+      exit() {
+        print('}}');
+      },
+      keys: {
+        params: mustacheParams
       }
     }
   });

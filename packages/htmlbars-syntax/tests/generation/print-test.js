@@ -50,3 +50,7 @@ test('MustacheStatement: in element attribute string', function() {
 test('ElementModifierStatement', function() {
   printEqual('<p {{action "activate"}} {{someting foo="bar"}}>Test</p>');
 });
+
+test('PartialStatement', function() {
+  printEqual('<p>{{>something "param"}}</p>');
+});
