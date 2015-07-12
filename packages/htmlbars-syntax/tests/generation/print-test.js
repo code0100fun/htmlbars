@@ -39,8 +39,8 @@ test('MustacheStatement: as element attribute', function() {
   printEqual('<h1 class={{if foo "foo" "bar"}}>Test</h1>');
 });
 
-test('MustacheStatement: as element attribute', function() {
-  printEqual('<h1 class={{if foo "foo" "bar"}}>Test</h1>');
+test('MustacheStatement: as element attribute with path', function() {
+  printEqual('<h1 class={{color}}>Test</h1>');
 });
 
 test('MustacheStatement: in element attribute string', function() {
