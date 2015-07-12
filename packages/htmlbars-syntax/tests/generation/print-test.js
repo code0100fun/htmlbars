@@ -54,3 +54,7 @@ test('ElementModifierStatement', function() {
 test('PartialStatement', function() {
   printEqual('<p>{{>something "param"}}</p>');
 });
+
+test('SubExpression', function() {
+  printEqual('<p>{{my-component submit=(action (mut model.name) (full-name model.firstName "Smith"))}}</p>');
+});
