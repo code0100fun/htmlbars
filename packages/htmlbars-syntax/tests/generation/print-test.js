@@ -58,3 +58,11 @@ test('PartialStatement', function() {
 test('SubExpression', function() {
   printEqual('<p>{{my-component submit=(action (mut model.name) (full-name model.firstName "Smith"))}}</p>');
 });
+
+test('BlockStatement: multiline', function() {
+  printEqual('<ul>{{#each foos as |foo|}}\n  {{foo}}\n{{/each}}</ul>');
+});
+
+test('BlockStatement: inline', function() {
+  printEqual('{{#if foo}}<p>{{foo}}</p>{{/if}}');
+});
