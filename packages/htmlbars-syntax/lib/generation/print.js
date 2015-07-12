@@ -58,7 +58,7 @@ export default function build(ast) {
     }
     break;
     case 'PathExpression':
-      output.push(ast.parts.join('.'));
+      output.push(ast.original);
     break;
     case 'SubExpression': {
       output.push('(', pathParams(ast), ')');

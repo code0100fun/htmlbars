@@ -23,6 +23,10 @@ test('TextNode: chars', function() {
   printEqual('<h1>Test</h1>');
 });
 
+test('MustacheStatement: slash in path', function() {
+  printEqual('{{namespace/foo "bar" baz="qux"}}');
+});
+
 test('MustacheStatement: path', function() {
   printEqual('<h1>{{model.title}}</h1>');
 });
